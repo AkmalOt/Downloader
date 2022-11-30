@@ -85,10 +85,36 @@ func (s *Services) Login(userInfo *models.AuthInfo) (string, error) {
 }
 
 func (s *Services) FolderCreation(userInfo *models.Folder) error {
-	err := s.Repository.FolderCreationForUser(userInfo.Name, userInfo.UserID, userInfo.FolderID)
+	err := s.Repository.FolderCreationForUser(userInfo.Name, userInfo.UserID, userInfo.Folder_ID)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
 	return nil
+}
+
+func (s *Services) GetFoldersFromParent(userInfo *models.Folder) ([]*models.Folder, error) {
+	var list []*models.Folder
+	folder, err := s.Repository.GetFoldersFromParent(userInfo)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	list = folder
+	log.Println("test in ShowFolder of service", folder[1])
+	return list, err
+}
+
+func (s *Services) GetParentFolders(userInfo *models.Folder) ([]*models.Folder, error) {
+	var list []*models.Folder
+	folder, err := s.Repository.GetParentFolders(userInfo)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	list = folder
+	log.Println("test in ShowFolder of service", folder[1])
+	return list, err
 }

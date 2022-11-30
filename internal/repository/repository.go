@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"Uploader/internal/models"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"log"
@@ -113,20 +114,8 @@ func (r *Repository) ValidateToken(token string) (string, string, error) {
 	return tokenS.ID, tokenS.UserId, nil
 }
 
-//func (r *Repository) UserIdFromToken(token string) (string, error) {
-//	var tokenS TokenStruct
-//	log.Println("324")
-//	sqlQuery := `select *from cloud_tokens where user_id =?;`
-//
-//	if err := r.Connection.Raw(sqlQuery, token).Scan(&tokenS).Error; err != nil {
-//		return "", nil
-//	}
-//
-//	return tokenS.ID, nil
-//}
-
 func (r *Repository) FolderCreationForUser(fileName, userId, folderId string) error {
-
+	log.Println(userId, folderId)
 	sqlQwery := `insert into cloud_folders(name, user_id, folder_id)
 				values (?, ?, ?);`
 
@@ -137,5 +126,32 @@ func (r *Repository) FolderCreationForUser(fileName, userId, folderId string) er
 		return tx.Error
 	}
 	return nil
+}
 
+func (r *Repository) GetFoldersFromParent(folder *models.Folder) ([]*models.Folder, error) {
+	var folders []*models.Folder
+	sqlQwery := `select * from cloud_folders cd where user_id= ?
+                              and folder_id= ?;`
+	tx := r.Connection.Raw(sqlQwery, folder.UserID, folder.Folder_ID).Scan(&folders)
+	if tx.Error != nil {
+		log.Println("tx error", tx.Error)
+		return nil, tx.Error
+	}
+	//log.Println("test", folders.Name, folders.FolderID, "one")
+	return folders, nil
+}
+
+//coalesce(cd.folder_id, '')
+
+func (r *Repository) GetParentFolders(folder *models.Folder) ([]*models.Folder, error) {
+	var folders []*models.Folder
+	sqlQwery := `select coalesce(cd.folder_id, '') from cloud_folders cd where user_id= ?
+                              and folder_id= ?;`
+	tx := r.Connection.Raw(sqlQwery, folder.UserID, folder.Folder_ID).Scan(&folders)
+	if tx.Error != nil {
+		log.Println("tx error", tx.Error)
+		return nil, tx.Error
+	}
+	//log.Println("test", folders.Name, folders.FolderID, "one")
+	return folders, nil
 }

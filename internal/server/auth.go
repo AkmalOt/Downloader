@@ -66,7 +66,7 @@ func (s *Server) TokenValidator(next http.Handler) http.Handler {
 		}
 
 		request = request.WithContext(context.WithValue(request.Context(), userID, userId))
-		log.Println("test", tokenId, userId)
+		log.Println("test in WithContext", tokenId, userId)
 		//----------------------------
 		//log.Println(token)
 		//ctx := request.Context()

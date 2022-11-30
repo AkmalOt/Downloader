@@ -81,3 +81,84 @@ func (s *Server) FolderCreator(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("Folder created successful")
 }
+
+func (s *Server) GetFoldersFromParent(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	value := ctx.Value(userID)
+	userId := value.(string)
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err)
+	}
+	var FolderInfo models.Folder
+
+	FolderInfo.UserID = userId
+
+	err = json.Unmarshal(body, &FolderInfo)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	Folders, err := s.Services.GetFoldersFromParent(&FolderInfo)
+	if err != nil {
+		return
+	}
+
+	//for _, getUser := range Folders {
+	//	log.Println("*", getUser)
+
+	data, err := json.MarshalIndent(Folders, "", "  ")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	log.Println(string(data))
+	_, err = w.Write(data)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+}
+
+func (s *Server) GetParentFolders(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	value := ctx.Value(userID)
+	userId := value.(string)
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err)
+	}
+	var FolderInfo models.Folder
+
+	FolderInfo.UserID = userId
+	FolderInfo.Folder_ID = ""
+
+	err = json.Unmarshal(body, &FolderInfo)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	Folders, err := s.Services.GetParentFolders(&FolderInfo)
+	if err != nil {
+		return
+	}
+
+	//for _, getUser := range Folders {
+	//	log.Println("*", getUser)
+
+	data, err := json.MarshalIndent(Folders, "", "  ")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	log.Println(string(data))
+	_, err = w.Write(data)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+}
