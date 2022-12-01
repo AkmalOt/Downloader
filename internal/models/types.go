@@ -12,7 +12,7 @@ type AuthInfo struct {
 }
 
 type Folder struct {
-	Name      string `gorm:"name"`
-	UserID    string `gorm:"column:user_id"`
-	Folder_ID string `gorm:"column:folder_id"`
+	Name     string `gorm:"name"`
+	UserID   string `gorm:"column:user_id"`
+	FolderID string `gorm:"column:folder_id"`
 }

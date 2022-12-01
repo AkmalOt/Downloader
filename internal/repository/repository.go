@@ -132,7 +132,7 @@ func (r *Repository) GetFoldersFromParent(folder *models.Folder) ([]*models.Fold
 	var folders []*models.Folder
 	sqlQwery := `select * from cloud_folders cd where user_id= ?
                               and folder_id= ?;`
-	tx := r.Connection.Raw(sqlQwery, folder.UserID, folder.Folder_ID).Scan(&folders)
+	tx := r.Connection.Raw(sqlQwery, folder.UserID, folder.FolderID).Scan(&folders)
 	if tx.Error != nil {
 		log.Println("tx error", tx.Error)
 		return nil, tx.Error
@@ -147,7 +147,7 @@ func (r *Repository) GetParentFolders(folder *models.Folder) ([]*models.Folder, 
 	var folders []*models.Folder
 	sqlQwery := `select coalesce(cd.folder_id, '') from cloud_folders cd where user_id= ?
                               and folder_id= ?;`
-	tx := r.Connection.Raw(sqlQwery, folder.UserID, folder.Folder_ID).Scan(&folders)
+	tx := r.Connection.Raw(sqlQwery, folder.UserID, folder.FolderID).Scan(&folders)
 	if tx.Error != nil {
 		log.Println("tx error", tx.Error)
 		return nil, tx.Error

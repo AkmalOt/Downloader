@@ -85,7 +85,7 @@ func (s *Services) Login(userInfo *models.AuthInfo) (string, error) {
 }
 
 func (s *Services) FolderCreation(userInfo *models.Folder) error {
-	err := s.Repository.FolderCreationForUser(userInfo.Name, userInfo.UserID, userInfo.Folder_ID)
+	err := s.Repository.FolderCreationForUser(userInfo.Name, userInfo.UserID, userInfo.FolderID)
 	if err != nil {
 		log.Println(err)
 		return err
