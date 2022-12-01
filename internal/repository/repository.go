@@ -138,20 +138,37 @@ func (r *Repository) GetFoldersFromParent(folder *models.Folder) ([]*models.Fold
 		return nil, tx.Error
 	}
 	//log.Println("test", folders.Name, folders.FolderID, "one")
+
 	return folders, nil
 }
 
 //coalesce(cd.folder_id, '')
 
+type folderStruct struct {
+	Id       string
+	FolderId string
+}
+
 func (r *Repository) GetParentFolders(folder *models.Folder) ([]*models.Folder, error) {
 	var folders []*models.Folder
-	sqlQwery := `select coalesce(cd.folder_id, '') from cloud_folders cd where user_id= ?
-                              and folder_id= ?;`
-	tx := r.Connection.Raw(sqlQwery, folder.UserID, folder.FolderID).Scan(&folders)
+	var id folderStruct
+	sql := `select id, coalesce((select coalesce(folder_id, null))::text, ' ') from cloud_folders
+		where user_id= ?;`
+	tx := r.Connection.Raw(sql, folder.UserID).Scan(&id)
 	if tx.Error != nil {
 		log.Println("tx error", tx.Error)
 		return nil, tx.Error
 	}
+	log.Println(id.FolderId, id.Id, "hehe")
+
+	sqlQwery := `select *from cloud_folders where folder_id= ?;`
+	tx2 := r.Connection.Raw(sqlQwery, id.Id).Scan(&folders)
+	if tx2.Error != nil {
+		log.Println("tx error", tx2.Error)
+		return nil, tx2.Error
+
+	}
 	//log.Println("test", folders.Name, folders.FolderID, "one")
+	log.Println(folders)
 	return folders, nil
 }

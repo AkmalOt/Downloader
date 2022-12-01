@@ -102,7 +102,7 @@ func (s *Services) GetFoldersFromParent(userInfo *models.Folder) ([]*models.Fold
 	}
 
 	list = folder
-	log.Println("test in ShowFolder of service", folder[1])
+	//log.Println("test in ShowFolder of service", folder[1])
 	return list, err
 }
 
@@ -115,6 +115,6 @@ func (s *Services) GetParentFolders(userInfo *models.Folder) ([]*models.Folder, 
 	}
 
 	list = folder
-	log.Println("test in ShowFolder of service", folder[1])
+	//log.Println("test in ShowFolder of service", folder[1])
 	return list, err
 }

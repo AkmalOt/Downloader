@@ -134,7 +134,7 @@ func (s *Server) GetParentFolders(w http.ResponseWriter, r *http.Request) {
 	var FolderInfo models.Folder
 
 	FolderInfo.UserID = userId
-	FolderInfo.FolderID = ""
+	//FolderInfo.FolderID = ""
 
 	err = json.Unmarshal(body, &FolderInfo)
 	if err != nil {
