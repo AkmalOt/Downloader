@@ -172,3 +172,16 @@ func (r *Repository) GetParentFolders(folder *models.Folder) ([]*models.Folder, 
 	log.Println(folders)
 	return folders, nil
 }
+
+func (r *Repository) UploadFile(name, url, userId, folderId string) error {
+	log.Println(name, url, userId, folderId)
+	sqlQwery := `insert into cloud_files(name, url, user_id, folder_id)
+				values (?, ?, ?, ?); `
+
+	tx := r.Connection.Exec(sqlQwery, name, url, userId, folderId)
+	if tx.Error != nil {
+		log.Println("error in uploadFile", tx.Error)
+		return tx.Error
+	}
+	return nil
+}

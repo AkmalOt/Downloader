@@ -31,6 +31,7 @@ func (s *Server) Init() {
 	TestRoute.HandleFunc("/create_folder", s.FolderCreator)
 	TestRoute.HandleFunc("/show_folder", s.GetFoldersFromParent)
 	TestRoute.HandleFunc("/show_parent_folder", s.GetParentFolders)
+	TestRoute.HandleFunc("/upload_file", s.UploaFile)
 
 	//authRoute.HandleFunc("/login", s.Test).Methods("POST")
 	//s.Mux.HandleFunc("/test", s.Test)

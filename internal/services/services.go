@@ -118,3 +118,12 @@ func (s *Services) GetParentFolders(userInfo *models.Folder) ([]*models.Folder, 
 	//log.Println("test in ShowFolder of service", folder[1])
 	return list, err
 }
+
+func (s *Services) UploadFile(file *models.File) error {
+
+	err := s.Repository.UploadFile(file.Name, file.TargetUrl, file.UserID, file.FolderID)
+	if err != nil {
+		log.Println(err)
+	}
+	return nil
+}

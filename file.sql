@@ -36,6 +36,7 @@ create table cloud_folders (
 create table cloud_files (
                              id uuid primary key not null default uuid_generate_v1(),
                              name text not null,
+                             url text not null,
                              user_id uuid not null references cloud_user,
                              folder_id uuid not null references cloud_folders,
                              created_at timestamptz not null default current_timestamp,
