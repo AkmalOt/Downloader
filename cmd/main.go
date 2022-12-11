@@ -29,7 +29,7 @@ func execute() error {
 	newRepository := repository.NewRepository(connection)
 
 	newServices := services.NewServices(newRepository)
-
+	//newServicesConf := services.NewServices()
 	newServer := server.NewServer(router, newServices)
 
 	newServer.Init()

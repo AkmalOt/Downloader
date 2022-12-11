@@ -18,8 +18,12 @@ type Folder struct {
 }
 
 type File struct {
-	Name      string `json:"name" gorm:"name"`
-	TargetUrl string `json:"url" gorm:"url"`
-	UserID    string `json:"user_id" gorm:"column:user_id"`
-	FolderID  string `json:"folder_id" gorm:"column:folder_id"`
+	ID       string `json:"id" gorm:"id"`
+	Name     string `json:"name" gorm:"name"`
+	UserID   string `json:"user_id" gorm:"column:user_id"`
+	FolderID string `json:"folder_id" gorm:"column:folder_id"`
 }
+
+//type FileLinkInSrv struct {
+//	FileDirPath string
+//}

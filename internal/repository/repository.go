@@ -149,7 +149,7 @@ type folderStruct struct {
 	FolderId string
 }
 
-func (r *Repository) GetParentFolders(folder *models.Folder) ([]*models.Folder, error) {
+func (r *Repository) GetParentFolders(folder *models.Folder) (string, []*models.Folder, error) {
 	var folders []*models.Folder
 	var id folderStruct
 	sql := `select id, coalesce((select coalesce(folder_id, null))::text, ' ') from cloud_folders
@@ -157,7 +157,7 @@ func (r *Repository) GetParentFolders(folder *models.Folder) ([]*models.Folder, 
 	tx := r.Connection.Raw(sql, folder.UserID).Scan(&id)
 	if tx.Error != nil {
 		log.Println("tx error", tx.Error)
-		return nil, tx.Error
+		return "", nil, tx.Error
 	}
 	log.Println(id.FolderId, id.Id, "hehe")
 
@@ -165,23 +165,59 @@ func (r *Repository) GetParentFolders(folder *models.Folder) ([]*models.Folder, 
 	tx2 := r.Connection.Raw(sqlQwery, id.Id).Scan(&folders)
 	if tx2.Error != nil {
 		log.Println("tx error", tx2.Error)
-		return nil, tx2.Error
+		return "", nil, tx2.Error
 
 	}
 	//log.Println("test", folders.Name, folders.FolderID, "one")
-	log.Println(folders)
-	return folders, nil
+	log.Println(id.Id, folders)
+	return id.Id, folders, nil
 }
 
-func (r *Repository) UploadFile(name, url, userId, folderId string) error {
-	log.Println(name, url, userId, folderId)
-	sqlQwery := `insert into cloud_files(name, url, user_id, folder_id)
-				values (?, ?, ?, ?); `
+func (r *Repository) GetFiles(file *models.File) ([]*models.File, error) {
+	var files []*models.File
+	sqlQwery := `select *from cloud_files where folder_id= ?;`
+	tx := r.Connection.Raw(sqlQwery, file.FolderID).Scan(&files)
+	if tx.Error != nil {
+		log.Println("tx error", tx.Error)
+		return nil, tx.Error
+	}
+	log.Println(files)
+	return files, nil
+}
 
-	tx := r.Connection.Exec(sqlQwery, name, url, userId, folderId)
+func (r *Repository) UploadFile(name, userId, folderId string) error {
+	//log.Println(name, url, userId, folderId)
+	sqlQwery := `insert into cloud_files(name, user_id, folder_id)
+				values (?, ?, ?); `
+
+	tx := r.Connection.Exec(sqlQwery, name, userId, folderId)
 	if tx.Error != nil {
 		log.Println("error in uploadFile", tx.Error)
 		return tx.Error
 	}
 	return nil
+}
+
+func (r *Repository) DownloadFiles(id string) (*models.File, error) {
+	var files *models.File
+	sqlQwery := `select *from cloud_files where id= ?;`
+	tx := r.Connection.Raw(sqlQwery, id).Scan(&files)
+	if tx.Error != nil {
+		log.Println("tx error", tx.Error)
+		return nil, tx.Error
+	}
+	return files, nil
+}
+
+func (r *Repository) ValidationForDownload(files *models.File) (string, error) {
+
+	sqlQwery := `select user_id from cloud_files where id= ?;`
+	tx := r.Connection.Raw(sqlQwery, files.ID).Scan(&files)
+	if tx.Error != nil {
+		log.Println("tx error", tx.Error)
+		return "", tx.Error
+	}
+	//log.Println("test", folders.Name, folders.FolderID, "one")
+
+	return files.UserID, nil
 }

@@ -1,21 +1,25 @@
 package services
 
 import (
-	"Uploader/internal/models"
+	models "Uploader/internal/models"
 	"Uploader/internal/repository"
 	"crypto/rand"
 	"encoding/hex"
+	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
+	"io"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 type Services struct {
-	Repository *repository.Repository
+	Repository  *repository.Repository
+	FileDirPath string //todo change, add to configs
 }
 
 func NewServices(rep *repository.Repository) *Services {
-	return &Services{Repository: rep}
+	return &Services{Repository: rep, FileDirPath: "./files"}
 }
 
 // Регистарция
@@ -106,24 +110,82 @@ func (s *Services) GetFoldersFromParent(userInfo *models.Folder) ([]*models.Fold
 	return list, err
 }
 
-func (s *Services) GetParentFolders(userInfo *models.Folder) ([]*models.Folder, error) {
-	var list []*models.Folder
-	folder, err := s.Repository.GetParentFolders(userInfo)
+func (s *Services) GetParentFolders(userInfo *models.Folder) (string, []*models.Folder, error) {
+	//var list []*models.Folder
+	id, folder, err := s.Repository.GetParentFolders(userInfo)
+	if err != nil {
+		log.Println(err)
+		return "", nil, err
+	}
+
+	//list = folder
+	//log.Println("test in ShowFolder of service", folder[1])
+	return id, folder, err
+}
+
+func (s *Services) GetFiles(userFiles *models.File) ([]*models.File, error) {
+	files, err := s.Repository.GetFiles(userFiles)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
+	log.Println(files)
+	return files, nil
+}
 
-	list = folder
-	//log.Println("test in ShowFolder of service", folder[1])
-	return list, err
+func (s *Services) SaveFile(file io.Reader, fileName string, upfile *models.File) (*models.File, error) {
+	log.Print(fileName)
+	extension := fileName[len(fileName)-4:]
+	var count int
+	for i := 0; i <= len(fileName); i++ {
+		count++
+		if string(fileName[i]) == "." {
+
+			break
+		}
+	}
+	upfile.Name = fileName[0 : count-1]
+	path := filepath.Join(s.FileDirPath, upfile.Name+extension)
+	MainFile, err := os.Create(path)
+	if err != nil {
+		err := errors.WithStack(err)
+		return nil, err
+	}
+
+	defer MainFile.Close()
+
+	_, err = io.Copy(MainFile, file)
+	if err != nil {
+		//err := errors.WithStack(err)
+		log.Println(err)
+		return nil, err
+	}
+
+	upfile.Name = upfile.Name + extension
+	//log.Println("tetetetetetet", upfile.Name, upfile.UserID, upfile.TargetUrl)
+	log.Println(upfile.Name, upfile.UserID)
+	return upfile, nil
 }
 
 func (s *Services) UploadFile(file *models.File) error {
 
-	err := s.Repository.UploadFile(file.Name, file.TargetUrl, file.UserID, file.FolderID)
+	err := s.Repository.UploadFile(file.Name, file.UserID, file.FolderID)
 	if err != nil {
 		log.Println(err)
 	}
 	return nil
 }
+
+func (s *Services) DownloadFiles(id string) (*models.File, error) {
+	return s.Repository.DownloadFiles(id)
+}
+
+//func (s *Services) ValidationForDownload(file *models.File) (string, error) { // todo need to rework
+//	ab, err := s.ValidationForDownload(file)
+//	if err != nil {
+//		log.Println(err)
+//		return "", err
+//	}
+//	log.Println(ab)
+//	return ab, nil
+//}
