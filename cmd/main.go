@@ -6,6 +6,7 @@ import (
 	"Uploader/internal/repository"
 	"Uploader/internal/server"
 	"Uploader/internal/services"
+	"Uploader/pkg"
 	"github.com/gorilla/mux"
 	"log"
 	"net"
@@ -13,6 +14,7 @@ import (
 )
 
 func main() {
+
 	err := execute()
 	if err != nil {
 		log.Println(err)
@@ -20,6 +22,7 @@ func main() {
 }
 
 func execute() error {
+	log := logging.GetLogger()
 	router := mux.NewRouter()
 
 	connection, err := db.GetDbConnection()

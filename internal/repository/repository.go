@@ -2,14 +2,15 @@ package repository
 
 import (
 	"Uploader/internal/models"
+	logging "Uploader/pkg"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
-	"log"
 	"time"
 )
 
 type Repository struct {
 	Connection *gorm.DB
+	log        logging.Logger
 }
 
 func NewRepository(conn *gorm.DB) *Repository {
@@ -23,6 +24,8 @@ type Temp struct {
 }
 
 func (r *Repository) Registration(name string, login string, password []byte) error {
+	log := logging.GetLogger()
+
 	sqlQwery := `insert into cloud_user(name, login, password)
 				values (?,?,?);`
 
@@ -37,6 +40,7 @@ func (r *Repository) Registration(name string, login string, password []byte) er
 }
 
 func (r *Repository) CreateUserFolder(login string) error {
+	log := logging.GetLogger()
 	var user Temp
 	sqlQuery := `select id from cloud_user where login =?;`
 	if err := r.Connection.Raw(sqlQuery, login).Scan(&user).Error; err != nil {
@@ -58,6 +62,7 @@ func (r *Repository) CreateUserFolder(login string) error {
 }
 
 func (r *Repository) Login(login string) (*Temp, error) {
+	log := logging.GetLogger()
 	var user Temp
 	sqlQuery := `select name, password, id from cloud_user where login = ?;`
 
@@ -79,6 +84,7 @@ func (r *Repository) Login(login string) (*Temp, error) {
 }
 
 func (r Repository) SetToken(token string, userId string) error {
+	log := logging.GetLogger()
 	//log.Println(token)
 	sqlQwery := `insert into cloud_tokens (token, user_id)
 				values (?, ?);`
@@ -98,6 +104,7 @@ type TokenStruct struct {
 }
 
 func (r *Repository) ValidateToken(token string) (string, string, error) {
+	log := logging.GetLogger()
 	var tokenS TokenStruct
 	log.Println("324")
 	sqlQuery := `select *from cloud_tokens where token =?;`
@@ -115,6 +122,7 @@ func (r *Repository) ValidateToken(token string) (string, string, error) {
 }
 
 func (r *Repository) FolderCreationForUser(fileName, userId, folderId string) error {
+	log := logging.GetLogger()
 	log.Println(userId, folderId)
 	sqlQwery := `insert into cloud_folders(name, user_id, folder_id)
 				values (?, ?, ?);`
@@ -129,6 +137,7 @@ func (r *Repository) FolderCreationForUser(fileName, userId, folderId string) er
 }
 
 func (r *Repository) GetFoldersFromParent(folder *models.Folder) ([]*models.Folder, error) {
+	log := logging.GetLogger()
 	var folders []*models.Folder
 	sqlQwery := `select * from cloud_folders cd where user_id= ?
                               and folder_id= ?;`
@@ -150,6 +159,7 @@ type folderStruct struct {
 }
 
 func (r *Repository) GetParentFolders(folder *models.Folder) (string, []*models.Folder, error) {
+	log := logging.GetLogger()
 	var folders []*models.Folder
 	var id folderStruct
 	sql := `select id, coalesce((select coalesce(folder_id, null))::text, ' ') from cloud_folders
@@ -174,6 +184,7 @@ func (r *Repository) GetParentFolders(folder *models.Folder) (string, []*models.
 }
 
 func (r *Repository) GetFiles(file *models.File) ([]*models.File, error) {
+	log := logging.GetLogger()
 	var files []*models.File
 	sqlQwery := `select *from cloud_files where folder_id= ?;`
 	tx := r.Connection.Raw(sqlQwery, file.FolderID).Scan(&files)
@@ -186,6 +197,7 @@ func (r *Repository) GetFiles(file *models.File) ([]*models.File, error) {
 }
 
 func (r *Repository) UploadFile(name, userId, folderId string) error {
+	log := logging.GetLogger()
 	//log.Println(name, url, userId, folderId)
 	sqlQwery := `insert into cloud_files(name, user_id, folder_id)
 				values (?, ?, ?); `
@@ -199,6 +211,7 @@ func (r *Repository) UploadFile(name, userId, folderId string) error {
 }
 
 func (r *Repository) DownloadFiles(id string) (*models.File, error) {
+	log := logging.GetLogger()
 	var files *models.File
 	sqlQwery := `select *from cloud_files where id= ?;`
 	tx := r.Connection.Raw(sqlQwery, id).Scan(&files)
@@ -210,6 +223,7 @@ func (r *Repository) DownloadFiles(id string) (*models.File, error) {
 }
 
 func (r *Repository) ValidationForDownload(files *models.File) (string, error) {
+	log := logging.GetLogger()
 
 	sqlQwery := `select user_id from cloud_files where id= ?;`
 	tx := r.Connection.Raw(sqlQwery, files.ID).Scan(&files)

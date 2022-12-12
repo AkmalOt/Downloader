@@ -2,8 +2,8 @@ package server
 
 import (
 	"Uploader/internal/repository"
+	logging "Uploader/pkg"
 	"context"
-	"log"
 	"net/http"
 )
 
@@ -47,6 +47,7 @@ type contextKey struct {
 
 func (s *Server) TokenValidator(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		log := logging.GetLogger()
 
 		//values := request.URL.Query()
 		//token := values.Get("token")

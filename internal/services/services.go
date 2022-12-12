@@ -3,6 +3,7 @@ package services
 import (
 	models "Uploader/internal/models"
 	"Uploader/internal/repository"
+	logging "Uploader/pkg"
 	"crypto/rand"
 	"encoding/hex"
 	"github.com/pkg/errors"
@@ -24,6 +25,7 @@ func NewServices(rep *repository.Repository) *Services {
 
 // Регистарция
 func (s *Services) Register(userInfo *models.AuthInfo) error {
+	log := logging.GetLogger()
 	hash, err := bcrypt.GenerateFromPassword([]byte(userInfo.Password), bcrypt.DefaultCost)
 	if err != nil {
 		log.Println(err)
@@ -45,6 +47,7 @@ func (s *Services) Register(userInfo *models.AuthInfo) error {
 }
 
 func (s *Services) Login(userInfo *models.AuthInfo) (string, error) {
+	log := logging.GetLogger()
 
 	user, err := s.Repository.Login(userInfo.Login)
 
@@ -89,6 +92,7 @@ func (s *Services) Login(userInfo *models.AuthInfo) (string, error) {
 }
 
 func (s *Services) FolderCreation(userInfo *models.Folder) error {
+	log := logging.GetLogger()
 	err := s.Repository.FolderCreationForUser(userInfo.Name, userInfo.UserID, userInfo.FolderID)
 	if err != nil {
 		log.Println(err)
@@ -111,6 +115,7 @@ func (s *Services) GetFoldersFromParent(userInfo *models.Folder) ([]*models.Fold
 }
 
 func (s *Services) GetParentFolders(userInfo *models.Folder) (string, []*models.Folder, error) {
+	log := logging.GetLogger()
 	//var list []*models.Folder
 	id, folder, err := s.Repository.GetParentFolders(userInfo)
 	if err != nil {
@@ -124,6 +129,7 @@ func (s *Services) GetParentFolders(userInfo *models.Folder) (string, []*models.
 }
 
 func (s *Services) GetFiles(userFiles *models.File) ([]*models.File, error) {
+	log := logging.GetLogger()
 	files, err := s.Repository.GetFiles(userFiles)
 	if err != nil {
 		log.Println(err)
@@ -134,6 +140,7 @@ func (s *Services) GetFiles(userFiles *models.File) ([]*models.File, error) {
 }
 
 func (s *Services) SaveFile(file io.Reader, fileName string, upfile *models.File) (*models.File, error) {
+	log := logging.GetLogger()
 	log.Print(fileName)
 	extension := fileName[len(fileName)-4:]
 	var count int
@@ -168,6 +175,7 @@ func (s *Services) SaveFile(file io.Reader, fileName string, upfile *models.File
 }
 
 func (s *Services) UploadFile(file *models.File) error {
+	log := logging.GetLogger()
 
 	err := s.Repository.UploadFile(file.Name, file.UserID, file.FolderID)
 	if err != nil {
@@ -177,6 +185,7 @@ func (s *Services) UploadFile(file *models.File) error {
 }
 
 func (s *Services) DownloadFiles(id string) (*models.File, error) {
+	
 	return s.Repository.DownloadFiles(id)
 }
 

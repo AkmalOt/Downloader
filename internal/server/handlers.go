@@ -2,15 +2,19 @@ package server
 
 import (
 	"Uploader/internal/models"
+	logging "Uploader/pkg"
 	"encoding/json"
+	"fmt"
 	"github.com/pkg/errors"
 	"io"
-	"log"
 	"net/http"
 	"os"
 )
 
+//
+
 func (s *Server) Registration(w http.ResponseWriter, r *http.Request) {
+	log := logging.GetLogger()
 
 	bytes, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -36,6 +40,7 @@ func (s *Server) Registration(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
+	log := logging.GetLogger()
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -61,6 +66,8 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) FolderCreator(w http.ResponseWriter, r *http.Request) {
+	log := logging.GetLogger()
+
 	ctx := r.Context()
 	value := ctx.Value(userID)
 	userId := value.(string)
@@ -85,6 +92,8 @@ func (s *Server) FolderCreator(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) GetFoldersFromParent(w http.ResponseWriter, r *http.Request) {
+	log := logging.GetLogger()
+
 	ctx := r.Context()
 	value := ctx.Value(userID)
 	userId := value.(string)
@@ -125,6 +134,8 @@ func (s *Server) GetFoldersFromParent(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) GetParentFolders(w http.ResponseWriter, r *http.Request) {
+	log := logging.GetLogger()
+
 	ctx := r.Context()
 	value := ctx.Value(userID)
 	userId := value.(string)
@@ -180,9 +191,150 @@ func (s *Server) GetParentFolders(w http.ResponseWriter, r *http.Request) {
 
 	log.Println(FolderInfo.FolderID, "haha", ParentId)
 	//log.Println(FilesInfo.FolderID, "haha", FileData)
+
+	//ctx := r.Context()
+	//value := ctx.Value(userID)
+	//userId := value.(string)
+	//
+	//body, err := io.ReadAll(r.Body)
+	//if err != nil {
+	//	log.Println(err)
+	//}
+	//var FolderInfo models.Folder
+	//var FilesInfo models.File
+	//var FileAndFolders models.FilesAndFolders
+	//
+	//FolderInfo.UserID = userId
+	//FilesInfo.UserID = userId
+	//
+	////FolderInfo.FolderID = ""
+	//
+	//err = json.Unmarshal(body, &FolderInfo)
+	//if err != nil {
+	//	log.Println(err)
+	//	return
+	//}
+	//if FilesInfo.FolderID == "" {
+	//	ParentId, Folders, err := s.Services.GetParentFolders(&FolderInfo)
+	//	if err != nil {
+	//		return
+	//	}
+	//
+	//	FilesInfo.FolderID = ParentId
+	//	Files, err := s.Services.GetFiles(&FilesInfo)
+	//	if err != nil {
+	//		log.Println(err)
+	//		return
+	//	}
+	//
+	//	log.Println(Folders, Files)
+	//
+	//	FileAndFolders.Folder = FolderInfo
+	//	FileAndFolders.File = FilesInfo
+	//
+	//	Folder, err := json.MarshalIndent(FileAndFolders.Folder, "", "  ")
+	//	if err != nil {
+	//		log.Println(err)
+	//		return
+	//	}
+	//	File, err := json.MarshalIndent(FileAndFolders.Folder, "", "  ")
+	//	if err != nil {
+	//		log.Println(err)
+	//		return
+	//	}
+	//
+	//	Comma := append(Folder, File...)
+	//	log.Println("this is Comma!!!", string(Comma))
+	//
+	//	FileAndFolderByte, err := json.MarshalIndent(FileAndFolders, "", "  ")
+	//	if err != nil {
+	//		log.Println(err)
+	//		return
+	//	}
+	//
+	//	_, err = w.Write(FileAndFolderByte)
+	//	if err != nil {
+	//		log.Println(err)
+	//		return
+	//	}
+	//	log.Println("test in empty", FileAndFolders)
+	//} else {
+	//	_, Folders, err := s.Services.GetParentFolders(&FolderInfo)
+	//	if err != nil {
+	//		return
+	//	}
+	//
+	//	Files, err := s.Services.GetFiles(&FilesInfo)
+	//	if err != nil {
+	//		log.Println(err)
+	//		return
+	//	}
+	//
+	//	log.Println(Folders, Files)
+	//
+	//	FileAndFolders.Folder = FolderInfo
+	//	FileAndFolders.File = FilesInfo
+	//
+	//	Folder, err := json.MarshalIndent(FileAndFolders.Folder, "", "  ")
+	//	if err != nil {
+	//		log.Println(err)
+	//		return
+	//	}
+	//	File, err := json.MarshalIndent(FileAndFolders.Folder, "", "  ")
+	//	if err != nil {
+	//		log.Println(err)
+	//		return
+	//	}
+	//
+	//	Comma := append(Folder, File...)
+	//	log.Println("this is Comma!!!", Comma)
+	//
+	//	FileAndFolderByte, err := json.MarshalIndent(FileAndFolders, "", "  ")
+	//	if err != nil {
+	//		log.Println(err)
+	//		return
+	//	}
+	//
+	//	_, err = w.Write(FileAndFolderByte)
+	//	if err != nil {
+	//		log.Println(err)
+	//		return
+	//	}
+	//	log.Println("test in not-empty", FileAndFolders)
+	//	//log.Println(ParentId)
+	//	////FilesInfo.FolderID = ParentId
+	//	////Files, err := s.Services.GetFiles(&FilesInfo)
+	//	//
+	//	//FolderData, err := json.MarshalIndent(Folders, "", "  ")
+	//	//if err != nil {
+	//	//	log.Println(err)
+	//	//	return
+	//	//}
+	//
+	//	//FileData, err := json.MarshalIndent(Files, "", "  ")
+	//	//if err != nil {
+	//	//	log.Println(err)
+	//	//	return
+	//	//}
+	//
+	//	//log.Println(string(FolderData))
+	//	//_, err = w.Write(FolderData)
+	//	//if err != nil {
+	//	//	log.Println(err)
+	//	//	return
+	//	//}
+	//	//_, err = w.Write(FileData)
+	//	//if err != nil {
+	//	//	log.Println(err)
+	//	//	return
+	//	//}
+	//
+	//}
 }
 
 func (s *Server) GetFiles(w http.ResponseWriter, r *http.Request) {
+	log := logging.GetLogger()
+
 	ctx := r.Context()
 	value := ctx.Value(userID)
 	userId := value.(string)
@@ -202,29 +354,47 @@ func (s *Server) GetFiles(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
+	if FilesInfo.FolderID == "" {
+		parenFoldertId, _, _ := s.Services.GetParentFolders(&FolderInfo)
+		log.Println(parenFoldertId)
 
-	parentId, _, _ := s.Services.GetParentFolders(&FolderInfo)
-	log.Println(parentId)
+		FilesInfo.FolderID = parenFoldertId
+		log.Println(FilesInfo, "test")
 
-	FilesInfo.FolderID = parentId
-	log.Println(FilesInfo, "test")
+		Files, err := s.Services.GetFiles(&FilesInfo)
+		log.Println(Files)
+		FileData, err := json.MarshalIndent(Files, "", "  ")
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		fmt.Println("he;p!!!", FilesInfo.ID, FilesInfo.Name, FilesInfo.UserID, FilesInfo.FolderID)
+		_, err = w.Write(FileData)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+	} else {
+		log.Println(FilesInfo, "test")
 
-	Files, err := s.Services.GetFiles(&FilesInfo)
-	log.Println(Files)
-	FileData, err := json.MarshalIndent(Files, "", "  ")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	_, err = w.Write(FileData)
-	if err != nil {
-		log.Println(err)
-		return
+		Files, err := s.Services.GetFiles(&FilesInfo)
+		log.Println(Files)
+		FileData, err := json.MarshalIndent(Files, "", "  ")
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		fmt.Println("he;p!!!", FilesInfo.ID, FilesInfo.Name, FilesInfo.UserID, FilesInfo.FolderID)
+		_, err = w.Write(FileData)
+		if err != nil {
+			log.Println(err)
+			return
+		}
 	}
 }
 
 func (s *Server) UploadFile(w http.ResponseWriter, r *http.Request) {
+	log := logging.GetLogger()
 
 	ctx := r.Context()
 	value := ctx.Value(userID)
@@ -283,6 +453,7 @@ func (s *Server) UploadFile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) DownloadFile(w http.ResponseWriter, r *http.Request) {
+	log := logging.GetLogger()
 
 	ctx := r.Context()
 	value := ctx.Value(userID)

@@ -27,3 +27,8 @@ type File struct {
 //type FileLinkInSrv struct {
 //	FileDirPath string
 //}
+
+type FilesAndFolders struct {
+	Folder
+	File
+}

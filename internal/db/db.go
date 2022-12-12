@@ -1,13 +1,15 @@
 package db
 
 import (
+	logging "Uploader/pkg"
 	"fmt"
 	postgresDriver "gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"log"
 )
 
 func GetDbConnection() (*gorm.DB, error) {
+	log := logging.GetLogger()
+
 	host := "localhost"
 	port := "5432"
 	user := "humo"

@@ -2,13 +2,15 @@ package config
 
 import (
 	"Uploader/internal/models"
+	logging "Uploader/pkg"
 	"encoding/json"
 	"io"
-	"log"
 	"os"
 )
 
 func GetConfig() (*models.Config, error) {
+	log := logging.GetLogger()
+
 	//чтение и дессериализация конфигов
 	file, err := os.Open("./config/config.json")
 	if err != nil {
