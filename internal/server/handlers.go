@@ -425,7 +425,7 @@ func (s *Server) UploadFile(w http.ResponseWriter, r *http.Request) {
 
 	log.Println(FileInfo.Name, FileInfo.UserID, FileInfo.FolderID)
 
-	file, header, err := r.FormFile("file")
+	file, header, err := r.FormFile("files")
 	if err != nil {
 		log.Print("error in fromfile", err)
 		return
@@ -435,7 +435,7 @@ func (s *Server) UploadFile(w http.ResponseWriter, r *http.Request) {
 	log.Println(file, filename, FileInfo)
 	uploadFile, err := s.Services.SaveFile(file, filename, &FileInfo)
 	if err != nil {
-		log.Print("error in saveimage", err)
+		log.Print("error in saveFile", err)
 		return
 	}
 
@@ -444,7 +444,7 @@ func (s *Server) UploadFile(w http.ResponseWriter, r *http.Request) {
 	log.Println(file, filename, FileInfo)
 	err = s.Services.UploadFile(uploadFile)
 	if err != nil {
-		log.Print("error in upload file", err)
+		log.Print("error in upload files", err)
 		return
 	}
 
@@ -494,7 +494,7 @@ func (s *Server) DownloadFile(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	//f, err := io.ReadAll(file)
+	//f, err := io.ReadAll(files)
 	//if err != nil {
 	//	log.Println(err)
 	//}
@@ -584,15 +584,16 @@ func (s *Server) DeleteFile(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	log.Println(FileInfo.Name, "test")
 
-	//err = os.Remove("./files" + FileInfo.Name)
-	//if err != nil {
-	//	log.Println(err)
-	//	return
-	//}
+	_, err = s.Services.GetFileInfoByID(&FileInfo)
 
-	_, err = s.Services.DeleteFile(&FileInfo)
+	err = os.Remove("./files/" + FileInfo.Name)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	err = s.Services.DeleteFile(&FileInfo)
 	if err != nil {
 		log.Println(err)
 		return

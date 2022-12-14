@@ -262,7 +262,7 @@ func (r *Repository) ChangeFolderName(folder *models.Folder) error {
 	return nil
 }
 
-func (r *Repository) DeleteFile(files *models.File) (*models.File, error) {
+func (r *Repository) GetFileInfoByID(files *models.File) (*models.File, error) {
 	log := logging.GetLogger()
 
 	sql := `select *from cloud_files where folder_id=?;`
@@ -271,14 +271,19 @@ func (r *Repository) DeleteFile(files *models.File) (*models.File, error) {
 		log.Println("tx error", tx.Error)
 		return nil, tx.Error
 	}
+	return files, nil
+}
 
-	// todo add select file
+func (r *Repository) DeleteFile(files *models.File) error {
+	log := logging.GetLogger()
+
+	// todo add select files
 	sqlQwery := `DELETE FROM cloud_files where id=?;`
-	tx = r.Connection.Raw(sqlQwery, files.ID).Scan(&files)
+	tx := r.Connection.Exec(sqlQwery, files.ID)
 	if tx.Error != nil {
 		log.Println("tx error", tx.Error)
-		return nil, tx.Error
+		return tx.Error
 	}
 
-	return files, nil
+	return nil
 }

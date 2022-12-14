@@ -189,8 +189,8 @@ func (s *Services) DownloadFiles(id string) (*models.File, error) {
 	return s.Repository.DownloadFiles(id)
 }
 
-//func (s *Services) ValidationForDownload(file *models.File) (string, error) { // todo need to rework
-//	ab, err := s.ValidationForDownload(file)
+//func (s *Services) ValidationForDownload(files *models.File) (string, error) { // todo need to rework
+//	ab, err := s.ValidationForDownload(files)
 //	if err != nil {
 //		log.Println(err)
 //		return "", err
@@ -207,6 +207,10 @@ func (s *Services) ChangeFolderName(folder *models.Folder) error {
 	return s.Repository.ChangeFolderName(folder)
 }
 
-func (s *Services) DeleteFile(files *models.File) (*models.File, error) {
+func (s *Services) GetFileInfoByID(files *models.File) (*models.File, error) {
+	return s.Repository.GetFileInfoByID(files)
+}
+
+func (s *Services) DeleteFile(files *models.File) error {
 	return s.Repository.DeleteFile(files)
 }
