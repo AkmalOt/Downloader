@@ -503,3 +503,100 @@ func (s *Server) DownloadFile(w http.ResponseWriter, r *http.Request) {
 	//
 	//w.WriteHeader(202)
 }
+
+func (s *Server) ChangeFileName(w http.ResponseWriter, r *http.Request) {
+	log := logging.GetLogger()
+
+	ctx := r.Context()
+	value := ctx.Value(userID)
+	userId := value.(string)
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err)
+	}
+	var FileInfo models.File
+
+	FileInfo.UserID = userId
+
+	err = json.Unmarshal(body, &FileInfo)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	err = s.Services.ChangeFileName(&FileInfo)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	w.WriteHeader(200)
+}
+
+func (s *Server) ChangeFolderName(w http.ResponseWriter, r *http.Request) {
+	log := logging.GetLogger()
+
+	ctx := r.Context()
+	value := ctx.Value(userID)
+	userId := value.(string)
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err)
+	}
+	var FolderInfo models.Folder
+
+	FolderInfo.UserID = userId
+
+	err = json.Unmarshal(body, &FolderInfo)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	err = s.Services.ChangeFolderName(&FolderInfo)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	w.WriteHeader(200)
+}
+
+func (s *Server) DeleteFile(w http.ResponseWriter, r *http.Request) {
+	log := logging.GetLogger()
+
+	ctx := r.Context()
+	value := ctx.Value(userID)
+	userId := value.(string)
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err)
+	}
+	var FileInfo models.File
+
+	FileInfo.UserID = userId
+
+	err = json.Unmarshal(body, &FileInfo)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	log.Println(FileInfo.Name, "test")
+
+	//err = os.Remove("./files" + FileInfo.Name)
+	//if err != nil {
+	//	log.Println(err)
+	//	return
+	//}
+
+	_, err = s.Services.DeleteFile(&FileInfo)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	w.WriteHeader(200)
+}

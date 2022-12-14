@@ -235,3 +235,50 @@ func (r *Repository) ValidationForDownload(files *models.File) (string, error) {
 
 	return files.UserID, nil
 }
+
+func (r *Repository) ChangeFileName(files *models.File) error {
+	log := logging.GetLogger()
+
+	sqlQwery := `update cloud_files set name= ? where id = ?;`
+	tx := r.Connection.Raw(sqlQwery, files.Name, files.ID).Scan(&files)
+	if tx.Error != nil {
+		log.Println("tx error", tx.Error)
+		return tx.Error
+	}
+
+	return nil
+}
+
+func (r *Repository) ChangeFolderName(folder *models.Folder) error {
+	log := logging.GetLogger()
+
+	sqlQwery := `update cloud_folders set name= ? where id = ?;`
+	tx := r.Connection.Raw(sqlQwery, folder.Name, folder.ID).Scan(&folder)
+	if tx.Error != nil {
+		log.Println("tx error", tx.Error)
+		return tx.Error
+	}
+
+	return nil
+}
+
+func (r *Repository) DeleteFile(files *models.File) (*models.File, error) {
+	log := logging.GetLogger()
+
+	sql := `select *from cloud_files where folder_id=?;`
+	tx := r.Connection.Raw(sql, files.FolderID).Scan(&files)
+	if tx.Error != nil {
+		log.Println("tx error", tx.Error)
+		return nil, tx.Error
+	}
+
+	// todo add select file
+	sqlQwery := `DELETE FROM cloud_files where id=?;`
+	tx = r.Connection.Raw(sqlQwery, files.ID).Scan(&files)
+	if tx.Error != nil {
+		log.Println("tx error", tx.Error)
+		return nil, tx.Error
+	}
+
+	return files, nil
+}

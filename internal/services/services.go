@@ -185,7 +185,7 @@ func (s *Services) UploadFile(file *models.File) error {
 }
 
 func (s *Services) DownloadFiles(id string) (*models.File, error) {
-	
+
 	return s.Repository.DownloadFiles(id)
 }
 
@@ -198,3 +198,15 @@ func (s *Services) DownloadFiles(id string) (*models.File, error) {
 //	log.Println(ab)
 //	return ab, nil
 //}
+
+func (s *Services) ChangeFileName(files *models.File) error {
+	return s.Repository.ChangeFileName(files)
+}
+
+func (s *Services) ChangeFolderName(folder *models.Folder) error {
+	return s.Repository.ChangeFolderName(folder)
+}
+
+func (s *Services) DeleteFile(files *models.File) (*models.File, error) {
+	return s.Repository.DeleteFile(files)
+}
