@@ -214,3 +214,11 @@ func (s *Services) GetFileInfoByID(files *models.File) (*models.File, error) {
 func (s *Services) DeleteFile(files *models.File) error {
 	return s.Repository.DeleteFile(files)
 }
+
+func (s *Services) GiveAccess(file *models.AccessTo) error {
+	return s.Repository.GiveAccess(file)
+}
+
+func (s *Services) GetAccessedFiles(file *models.AccessTo) ([]*models.AccessTo, error) {
+	return s.Repository.GetAccessedFiles(file)
+}

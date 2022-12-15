@@ -186,7 +186,7 @@ func (r *Repository) GetParentFolders(folder *models.Folder) (string, []*models.
 func (r *Repository) GetFiles(file *models.File) ([]*models.File, error) {
 	log := logging.GetLogger()
 	var files []*models.File
-	sqlQwery := `select *from cloud_files where folder_id= ?;`
+	sqlQwery := `select *from cloud_files where folder_id= ? and active=true;`
 	tx := r.Connection.Raw(sqlQwery, file.FolderID).Scan(&files)
 	if tx.Error != nil {
 		log.Println("tx error", tx.Error)
@@ -265,7 +265,7 @@ func (r *Repository) ChangeFolderName(folder *models.Folder) error {
 func (r *Repository) GetFileInfoByID(files *models.File) (*models.File, error) {
 	log := logging.GetLogger()
 
-	sql := `select *from cloud_files where folder_id=?;`
+	sql := `select *from cloud_files where folder_id=? and active= true;`
 	tx := r.Connection.Raw(sql, files.FolderID).Scan(&files)
 	if tx.Error != nil {
 		log.Println("tx error", tx.Error)
@@ -277,8 +277,7 @@ func (r *Repository) GetFileInfoByID(files *models.File) (*models.File, error) {
 func (r *Repository) DeleteFile(files *models.File) error {
 	log := logging.GetLogger()
 
-	// todo add select files
-	sqlQwery := `DELETE FROM cloud_files where id=?;`
+	sqlQwery := `update cloud_files set active=false where id=?;`
 	tx := r.Connection.Exec(sqlQwery, files.ID)
 	if tx.Error != nil {
 		log.Println("tx error", tx.Error)
@@ -286,4 +285,69 @@ func (r *Repository) DeleteFile(files *models.File) error {
 	}
 
 	return nil
+}
+
+func (r *Repository) GiveAccess(file *models.AccessTo) error {
+	log := logging.GetLogger()
+
+	sqlQwery := `insert into access(user_id, file_id, access_to, expire)
+				values (?, ?, ?, ?); `
+
+	if file.Expire == "" {
+		time := time.Now().Add(time.Hour * 10)
+		timeString := time.Format("2006-01-02 15:04:05")
+
+		file.Expire = timeString
+		tx := r.Connection.Exec(sqlQwery, file.UserID, file.FileId, file.AccessedID, file.Expire)
+		if tx.Error != nil {
+			log.Println("error in GiveAccess", tx.Error)
+			return tx.Error
+		}
+		return nil
+	} else {
+		tx := r.Connection.Exec(sqlQwery, file.UserID, file.FileId, file.AccessedID, file.Expire)
+		if tx.Error != nil {
+			log.Println("error in GiveAccess", tx.Error)
+			return tx.Error
+		}
+		return nil
+	}
+}
+
+func (r *Repository) GetAccessedFiles(file *models.AccessTo) ([]*models.AccessTo, error) { // todo check it
+	log := logging.GetLogger()
+	var files []*models.AccessTo
+	sql := `select *from access where access_to=? and active= true and expire > ?;`
+
+	currentTime := time.Now().Add(time.Hour * 10)
+	timeString := currentTime.Format("2006-01-02 15:04:05")
+
+	//TimeChecker, err := time.Parse("2006-01-02", timeString)
+	//if err != nil {
+	//	log.Println(err)
+	//	return nil, err
+	//}
+	//timeString := TimeChecker.Format("2006-01-02 15:04:05")
+
+	tx := r.Connection.Raw(sql, file.AccessedID, timeString).Scan(&files)
+	if tx.Error != nil {
+		log.Println("tx error", tx.Error)
+		return nil, tx.Error
+	}
+	//accessTime, err := time.Parse("2006-01-02", file.Expire)
+	//if err != nil {
+	//	log.Println(err)
+	//	return nil, err
+	//}
+	//TimeChecker := time.Now().After(accessTime)
+	//
+	//if TimeChecker == true {
+	//
+	//	return "", "", errors.New(" TimeChecker is true")
+	//}
+	//for i := 0; i < len(files); i++ {
+	//
+	//}
+	return files, nil
+
 }

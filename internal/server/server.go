@@ -37,6 +37,8 @@ func (s *Server) Init() {
 	TestRoute.HandleFunc("/change_file_name", s.ChangeFileName)
 	TestRoute.HandleFunc("/change_folder_name", s.ChangeFolderName)
 	TestRoute.HandleFunc("/delete_file", s.DeleteFile)
+	TestRoute.HandleFunc("/give_access", s.GiveAccess)
+	TestRoute.HandleFunc("/get_accessed_files", s.GetAccessedFiles)
 
 	//authRoute.HandleFunc("/login", s.Test).Methods("POST")
 	//s.Mux.HandleFunc("/test", s.Test)

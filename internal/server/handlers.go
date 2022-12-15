@@ -601,3 +601,66 @@ func (s *Server) DeleteFile(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(200)
 }
+
+func (s *Server) GiveAccess(w http.ResponseWriter, r *http.Request) {
+	log := logging.GetLogger()
+
+	ctx := r.Context()
+	value := ctx.Value(userID)
+	userId := value.(string)
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err)
+	}
+	var Access models.AccessTo
+
+	Access.UserID = userId
+
+	err = json.Unmarshal(body, &Access)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	err = s.Services.GiveAccess(&Access)
+	w.WriteHeader(200)
+
+}
+
+func (s *Server) GetAccessedFiles(w http.ResponseWriter, r *http.Request) {
+	log := logging.GetLogger()
+
+	ctx := r.Context()
+	value := ctx.Value(userID)
+	userId := value.(string)
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err)
+	}
+	var Access models.AccessTo
+
+	Access.AccessedID = userId
+
+	err = json.Unmarshal(body, &Access)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	data, err := s.Services.GetAccessedFiles(&Access)
+
+	FileData, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	_, err = w.Write(FileData)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	w.WriteHeader(202)
+
+}

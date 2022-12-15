@@ -25,11 +25,11 @@ type File struct {
 	FolderID string `json:"folder_id" gorm:"column:folder_id"`
 }
 
-//type FileLinkInSrv struct {
-//	FileDirPath string
-//}
-
-type FilesAndFolders struct {
-	Folder
-	File
+type AccessTo struct {
+	ID         string `json:"id" gorm:"id"`
+	UserID     string `json:"user_id" gorm:"column:user_id"`
+	FileId     string `json:"file_id" gorm:"column:file_id"`
+	AccessedID string `json:"access_to" gorm:"column:access_to"`
+	Active     bool   `json:"active" gorm:"column:active"`
+	Expire     string `json:"expire" gorm:"column:expire"`
 }
