@@ -664,3 +664,84 @@ func (s *Server) GetAccessedFiles(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(202)
 
 }
+
+func (s *Server) DownloadAccessedFiles(w http.ResponseWriter, r *http.Request) {
+	log := logging.GetLogger()
+
+	ctx := r.Context()
+	value := ctx.Value(userID)
+	userId := value.(string)
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err)
+	}
+	var FileInfo models.File
+	var AccessInfo models.AccessTo
+
+	FileInfo.UserID = userId
+
+	err = json.Unmarshal(body, &FileInfo)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	FileData, err := s.Services.DownloadAccessedFiles(&FileInfo)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	AccessInfo.AccessedID = userId
+	AccessInfo.FileId = FileInfo.ID
+
+	Validator, err := s.Services.Repository.ValidationForAccessDownload(&AccessInfo)
+
+	//log.Println("1", Validator.ID, "2", Validator.AccessedID, "3", Validator.UserID, "4", Validator.FileId)
+	if Validator.ID == "" {
+		log.Println("Access denied!")
+		w.WriteHeader(451)
+		return
+	}
+
+	file, err := os.OpenFile("files/"+FileData.Name, os.O_CREATE|os.O_RDWR, 0777)
+
+	defer file.Close()
+
+	_, err = io.Copy(w, file)
+	if err != nil {
+		return
+	}
+
+	w.WriteHeader(202)
+}
+
+func (s *Server) CloseAccess(w http.ResponseWriter, r *http.Request) {
+	log := logging.GetLogger()
+
+	ctx := r.Context()
+	value := ctx.Value(userID)
+	userId := value.(string)
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err)
+	}
+
+	var Access models.AccessTo
+
+	Access.UserID = userId
+
+	err = json.Unmarshal(body, &Access)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	err = s.Services.CloseAccess(&Access)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	w.WriteHeader(200)
+}

@@ -222,3 +222,15 @@ func (s *Services) GiveAccess(file *models.AccessTo) error {
 func (s *Services) GetAccessedFiles(file *models.AccessTo) ([]*models.AccessTo, error) {
 	return s.Repository.GetAccessedFiles(file)
 }
+
+func (s *Services) DownloadAccessedFiles(file *models.File) (*models.File, error) {
+	return s.Repository.DownloadAccessedFiles(file.ID)
+}
+
+func (s *Services) ValidationForAccessDownload(file *models.AccessTo) (*models.AccessTo, error) {
+	return s.Repository.ValidationForAccessDownload(file)
+}
+
+func (s *Services) CloseAccess(file *models.AccessTo) error {
+	return s.Repository.CloseAccess(file)
+}

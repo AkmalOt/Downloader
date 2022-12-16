@@ -322,32 +322,48 @@ func (r *Repository) GetAccessedFiles(file *models.AccessTo) ([]*models.AccessTo
 	currentTime := time.Now().Add(time.Hour * 10)
 	timeString := currentTime.Format("2006-01-02 15:04:05")
 
-	//TimeChecker, err := time.Parse("2006-01-02", timeString)
-	//if err != nil {
-	//	log.Println(err)
-	//	return nil, err
-	//}
-	//timeString := TimeChecker.Format("2006-01-02 15:04:05")
-
 	tx := r.Connection.Raw(sql, file.AccessedID, timeString).Scan(&files)
 	if tx.Error != nil {
 		log.Println("tx error", tx.Error)
 		return nil, tx.Error
 	}
-	//accessTime, err := time.Parse("2006-01-02", file.Expire)
-	//if err != nil {
-	//	log.Println(err)
-	//	return nil, err
-	//}
-	//TimeChecker := time.Now().After(accessTime)
-	//
-	//if TimeChecker == true {
-	//
-	//	return "", "", errors.New(" TimeChecker is true")
-	//}
-	//for i := 0; i < len(files); i++ {
-	//
-	//}
 	return files, nil
 
+}
+
+func (r *Repository) DownloadAccessedFiles(id string) (*models.File, error) {
+	log := logging.GetLogger()
+	var files *models.File
+	sqlQwery := `select *from cloud_files where id= ?;`
+	tx := r.Connection.Raw(sqlQwery, id).Scan(&files)
+	if tx.Error != nil {
+		log.Println("tx error", tx.Error)
+		return nil, tx.Error
+	}
+	return files, nil
+}
+
+func (r *Repository) ValidationForAccessDownload(files *models.AccessTo) (*models.AccessTo, error) {
+	log := logging.GetLogger()
+
+	sqlQwery := `select *from access where file_id= ? and access_to=?;`
+	tx := r.Connection.Raw(sqlQwery, files.FileId, files.AccessedID).Scan(&files)
+	if tx.Error != nil {
+		log.Println("tx error", tx.Error)
+		return nil, tx.Error
+	}
+	return files, nil
+}
+
+func (r *Repository) CloseAccess(file *models.AccessTo) error {
+	log := logging.GetLogger()
+
+	sqlQwery := `update access set active=false where file_id=? and user_id=? and access_to=?;`
+	tx := r.Connection.Exec(sqlQwery, file.FileId, file.UserID, file.AccessedID)
+	if tx.Error != nil {
+		log.Println("tx error", tx.Error)
+		return tx.Error
+	}
+
+	return nil
 }
