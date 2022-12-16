@@ -334,7 +334,7 @@ func (r *Repository) GetAccessedFiles(file *models.AccessTo) ([]*models.AccessTo
 func (r *Repository) DownloadAccessedFiles(id string) (*models.File, error) {
 	log := logging.GetLogger()
 	var files *models.File
-	sqlQwery := `select *from cloud_files where id= ?;`
+	sqlQwery := `select *from cloud_files where id= ? and active= true;`
 	tx := r.Connection.Raw(sqlQwery, id).Scan(&files)
 	if tx.Error != nil {
 		log.Println("tx error", tx.Error)
