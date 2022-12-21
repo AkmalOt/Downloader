@@ -26,7 +26,7 @@ type Temp struct {
 func (r *Repository) Registration(name string, login string, password []byte) error {
 	log := logging.GetLogger()
 
-	sqlQwery := `insert into cloud_user(name, login, password)
+	sqlQwery := `insert into users(name, login, password)
 				values (?,?,?);`
 
 	tx := r.Connection.Exec(sqlQwery, name, login, password)
@@ -42,12 +42,12 @@ func (r *Repository) Registration(name string, login string, password []byte) er
 func (r *Repository) CreateUserFolder(login string) error {
 	log := logging.GetLogger()
 	var user Temp
-	sqlQuery := `select id from cloud_user where login =?;`
+	sqlQuery := `select id from users where login =?;`
 	if err := r.Connection.Raw(sqlQuery, login).Scan(&user).Error; err != nil {
 		return err
 	}
 
-	sqlQwery := `insert into cloud_folders(name, user_id)
+	sqlQwery := `insert into folders(name, user_id)
 				values (?,?);`
 
 	tx := r.Connection.Exec(sqlQwery, login, user.ID)
@@ -64,7 +64,7 @@ func (r *Repository) CreateUserFolder(login string) error {
 func (r *Repository) Login(login string) (*Temp, error) {
 	log := logging.GetLogger()
 	var user Temp
-	sqlQuery := `select name, password, id from cloud_user where login = ?;`
+	sqlQuery := `select name, password, id from users where login = ?;`
 
 	if err := r.Connection.Raw(sqlQuery, login).Scan(&user).Error; err != nil {
 		log.Println(err)
@@ -86,7 +86,7 @@ func (r *Repository) Login(login string) (*Temp, error) {
 func (r Repository) SetToken(token string, userId string) error {
 	log := logging.GetLogger()
 	//log.Println(token)
-	sqlQwery := `insert into cloud_tokens (token, user_id)
+	sqlQwery := `insert into tokens (token, user_id)
 				values (?, ?);`
 
 	tx := r.Connection.Exec(sqlQwery, token, userId)
@@ -107,7 +107,7 @@ func (r *Repository) ValidateToken(token string) (string, string, error) {
 	log := logging.GetLogger()
 	var tokenS TokenStruct
 	log.Println("324")
-	sqlQuery := `select *from cloud_tokens where token =?;`
+	sqlQuery := `select *from tokens where token =?;`
 
 	if err := r.Connection.Raw(sqlQuery, token).Scan(&tokenS).Error; err != nil {
 		return "", "", nil
@@ -124,7 +124,7 @@ func (r *Repository) ValidateToken(token string) (string, string, error) {
 func (r *Repository) FolderCreationForUser(fileName, userId, folderId string) error {
 	log := logging.GetLogger()
 	log.Println(userId, folderId)
-	sqlQwery := `insert into cloud_folders(name, user_id, folder_id)
+	sqlQwery := `insert into folders(name, user_id, folder_id)
 				values (?, ?, ?);`
 
 	tx := r.Connection.Exec(sqlQwery, fileName, userId, folderId)
@@ -139,7 +139,7 @@ func (r *Repository) FolderCreationForUser(fileName, userId, folderId string) er
 func (r *Repository) GetFoldersFromParent(folder *models.Folder) ([]*models.Folder, error) {
 	log := logging.GetLogger()
 	var folders []*models.Folder
-	sqlQwery := `select * from cloud_folders cd where user_id= ?
+	sqlQwery := `select * from folders cd where user_id= ?
                               and folder_id= ?;`
 	tx := r.Connection.Raw(sqlQwery, folder.UserID, folder.FolderID).Scan(&folders)
 	if tx.Error != nil {
@@ -162,7 +162,7 @@ func (r *Repository) GetParentFolders(folder *models.Folder) (string, []*models.
 	log := logging.GetLogger()
 	var folders []*models.Folder
 	var id folderStruct
-	sql := `select id, coalesce((select coalesce(folder_id, null))::text, ' ') from cloud_folders
+	sql := `select id, coalesce((select coalesce(folder_id, null))::text, ' ') from folders
 		where user_id= ?;`
 	tx := r.Connection.Raw(sql, folder.UserID).Scan(&id)
 	if tx.Error != nil {
@@ -171,7 +171,7 @@ func (r *Repository) GetParentFolders(folder *models.Folder) (string, []*models.
 	}
 	log.Println(id.FolderId, id.Id, "hehe")
 
-	sqlQwery := `select *from cloud_folders where folder_id= ?;`
+	sqlQwery := `select *from folders where folder_id= ?;`
 	tx2 := r.Connection.Raw(sqlQwery, id.Id).Scan(&folders)
 	if tx2.Error != nil {
 		log.Println("tx error", tx2.Error)
@@ -186,7 +186,7 @@ func (r *Repository) GetParentFolders(folder *models.Folder) (string, []*models.
 func (r *Repository) GetFiles(file *models.File) ([]*models.File, error) {
 	log := logging.GetLogger()
 	var files []*models.File
-	sqlQwery := `select *from cloud_files where folder_id= ? and active=true;`
+	sqlQwery := `select *from files where folder_id= ? and active=true;`
 	tx := r.Connection.Raw(sqlQwery, file.FolderID).Scan(&files)
 	if tx.Error != nil {
 		log.Println("tx error", tx.Error)
@@ -199,7 +199,7 @@ func (r *Repository) GetFiles(file *models.File) ([]*models.File, error) {
 func (r *Repository) UploadFile(name, userId, folderId string) error {
 	log := logging.GetLogger()
 	//log.Println(name, url, userId, folderId)
-	sqlQwery := `insert into cloud_files(name, user_id, folder_id)
+	sqlQwery := `insert into files(name, user_id, folder_id)
 				values (?, ?, ?); `
 
 	tx := r.Connection.Exec(sqlQwery, name, userId, folderId)
@@ -213,7 +213,7 @@ func (r *Repository) UploadFile(name, userId, folderId string) error {
 func (r *Repository) DownloadFiles(id string) (*models.File, error) {
 	log := logging.GetLogger()
 	var files *models.File
-	sqlQwery := `select *from cloud_files where id= ?;`
+	sqlQwery := `select *from files where id= ?;`
 	tx := r.Connection.Raw(sqlQwery, id).Scan(&files)
 	if tx.Error != nil {
 		log.Println("tx error", tx.Error)
@@ -225,7 +225,7 @@ func (r *Repository) DownloadFiles(id string) (*models.File, error) {
 func (r *Repository) ValidationForDownload(files *models.File) (string, error) {
 	log := logging.GetLogger()
 
-	sqlQwery := `select user_id from cloud_files where id= ?;`
+	sqlQwery := `select user_id from files where id= ?;`
 	tx := r.Connection.Raw(sqlQwery, files.ID).Scan(&files)
 	if tx.Error != nil {
 		log.Println("tx error", tx.Error)
@@ -239,7 +239,7 @@ func (r *Repository) ValidationForDownload(files *models.File) (string, error) {
 func (r *Repository) ChangeFileName(files *models.File) error {
 	log := logging.GetLogger()
 
-	sqlQwery := `update cloud_files set name= ? where id = ?;`
+	sqlQwery := `update files set name= ? where id = ?;`
 	tx := r.Connection.Raw(sqlQwery, files.Name, files.ID).Scan(&files)
 	if tx.Error != nil {
 		log.Println("tx error", tx.Error)
@@ -252,7 +252,7 @@ func (r *Repository) ChangeFileName(files *models.File) error {
 func (r *Repository) ChangeFolderName(folder *models.Folder) error {
 	log := logging.GetLogger()
 
-	sqlQwery := `update cloud_folders set name= ? where id = ?;`
+	sqlQwery := `update folders set name= ? where id = ?;`
 	tx := r.Connection.Raw(sqlQwery, folder.Name, folder.ID).Scan(&folder)
 	if tx.Error != nil {
 		log.Println("tx error", tx.Error)
@@ -265,7 +265,7 @@ func (r *Repository) ChangeFolderName(folder *models.Folder) error {
 func (r *Repository) GetFileInfoByID(files *models.File) (*models.File, error) {
 	log := logging.GetLogger()
 
-	sql := `select *from cloud_files where folder_id=? and active= true;`
+	sql := `select *from files where folder_id=? and active= true;`
 	tx := r.Connection.Raw(sql, files.FolderID).Scan(&files)
 	if tx.Error != nil {
 		log.Println("tx error", tx.Error)
@@ -277,7 +277,7 @@ func (r *Repository) GetFileInfoByID(files *models.File) (*models.File, error) {
 func (r *Repository) DeleteFile(files *models.File) error {
 	log := logging.GetLogger()
 
-	sqlQwery := `update cloud_files set active=false where id=?;`
+	sqlQwery := `update files set active=false where id=?;`
 	tx := r.Connection.Exec(sqlQwery, files.ID)
 	if tx.Error != nil {
 		log.Println("tx error", tx.Error)
@@ -334,7 +334,7 @@ func (r *Repository) GetAccessedFiles(file *models.AccessTo) ([]*models.AccessTo
 func (r *Repository) DownloadAccessedFiles(id string) (*models.File, error) {
 	log := logging.GetLogger()
 	var files *models.File
-	sqlQwery := `select *from cloud_files where id= ? and active= true;`
+	sqlQwery := `select *from files where id= ? and active= true;`
 	tx := r.Connection.Raw(sqlQwery, id).Scan(&files)
 	if tx.Error != nil {
 		log.Println("tx error", tx.Error)

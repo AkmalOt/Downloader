@@ -33,3 +33,8 @@ func GetConfig() (*models.Config, error) {
 	}
 	return &config, err
 }
+
+func Direction() string {
+	Direction := "D:/Server"
+	return Direction
+}

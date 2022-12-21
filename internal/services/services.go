@@ -1,6 +1,7 @@
 package services
 
 import (
+	"Uploader/config"
 	models "Uploader/internal/models"
 	"Uploader/internal/repository"
 	logging "Uploader/pkg"
@@ -16,11 +17,11 @@ import (
 
 type Services struct {
 	Repository  *repository.Repository
-	FileDirPath string //todo change, add to configs
+	FileDirPath string
 }
 
 func NewServices(rep *repository.Repository) *Services {
-	return &Services{Repository: rep, FileDirPath: "./files"}
+	return &Services{Repository: rep, FileDirPath: config.Direction()}
 }
 
 // Регистарция
@@ -142,7 +143,16 @@ func (s *Services) GetFiles(userFiles *models.File) ([]*models.File, error) {
 func (s *Services) SaveFile(file io.Reader, fileName string, upfile *models.File) (*models.File, error) {
 	log := logging.GetLogger()
 	log.Print(fileName)
-	extension := fileName[len(fileName)-4:]
+	var dot int
+
+	switch {
+	case string(fileName[len(fileName)-5]) == ".":
+		dot = 5
+	case string(fileName[len(fileName)-4]) == ".":
+		dot = 4
+	}
+
+	extension := fileName[len(fileName)-dot:]
 	var count int
 	for i := 0; i <= len(fileName); i++ {
 		count++

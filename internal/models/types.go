@@ -6,9 +6,9 @@ type Config struct {
 }
 
 type AuthInfo struct {
-	Name     string `gorm:"name"`
-	Login    string `gorm:"login"`
-	Password string `gorm:"password"`
+	Name     string `json:"name" gorm:"name"`
+	Login    string `json:"login" gorm:"login"`
+	Password string `json:"password" gorm:"password"`
 }
 
 type Folder struct {

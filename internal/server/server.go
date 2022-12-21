@@ -28,7 +28,7 @@ func (s *Server) Init() {
 
 	TestRoute := s.Mux.PathPrefix("/test").Subrouter()
 	TestRoute.Use(s.TokenValidator)
-	TestRoute.HandleFunc("/create_folder", s.FolderCreator)
+	TestRoute.HandleFunc("/create_folder", s.FolderCreator) // post
 	TestRoute.HandleFunc("/show_folder", s.GetFoldersFromParent)
 	TestRoute.HandleFunc("/show_parent_folder", s.GetParentFolders)
 	TestRoute.HandleFunc("/get_files", s.GetFiles)

@@ -32,9 +32,10 @@ func (s *Server) Registration(w http.ResponseWriter, r *http.Request) {
 	err = s.Services.Register(&userInfo)
 	if err != nil {
 		log.Println(err)
+
 		return
 	}
-
+	log.Println("successful")
 	w.WriteHeader(200)
 
 }
