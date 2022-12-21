@@ -487,7 +487,7 @@ func (s *Server) DownloadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, err := os.OpenFile("files/"+FileData.Name, os.O_CREATE|os.O_RDWR, 0777)
+	file, err := os.OpenFile("D:server/"+FileData.Name, os.O_CREATE|os.O_RDWR, 0777)
 
 	defer file.Close()
 
@@ -502,7 +502,7 @@ func (s *Server) DownloadFile(w http.ResponseWriter, r *http.Request) {
 	//test := os.WriteFile(FileData.Name, f, 666)
 	//log.Println(test)
 	//
-	//w.WriteHeader(202)
+	w.WriteHeader(202)
 }
 
 func (s *Server) ChangeFileName(w http.ResponseWriter, r *http.Request) {

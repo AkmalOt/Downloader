@@ -5,14 +5,15 @@ import (
 	models "Uploader/internal/models"
 	"Uploader/internal/repository"
 	logging "Uploader/pkg"
-	"crypto/rand"
-	"encoding/hex"
+	"github.com/golang-jwt/jwt"
+
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type Services struct {
@@ -47,6 +48,10 @@ func (s *Services) Register(userInfo *models.AuthInfo) error {
 	return nil
 }
 
+// ================================================
+
+var mySingingKey = []byte("TestIsRealHard")
+
 func (s *Services) Login(userInfo *models.AuthInfo) (string, error) {
 	log := logging.GetLogger()
 
@@ -57,7 +62,7 @@ func (s *Services) Login(userInfo *models.AuthInfo) (string, error) {
 		return "", err
 	}
 
-	//log.Println(user.Password, " ----", userInfo.Password)
+	// ====== Тут идет хеширование
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(userInfo.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -74,21 +79,38 @@ func (s *Services) Login(userInfo *models.AuthInfo) (string, error) {
 	log.Println(user.Password, " ----", userInfo.Password, string(hash))
 
 	//============================================================================
-	buf := make([]byte, 256)
+	//Тут мы создаем Токен.
+	// старый метод
+	//buf := make([]byte, 256)
 
-	_, err = rand.Read(buf)
+	//_, err = rand.Read(buf)
+	//if err != nil {
+	//	return "", err
+	//}
+
+	//token := hex.EncodeToString(buf)
+
+	// JWT Method
+	token := jwt.New(jwt.SigningMethodHS384)
+
+	claims := token.Claims.(jwt.MapClaims)
+	claims["auth"] = true
+	claims["user"] = "test"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	log.Println(string(mySingingKey))
+	tokenString, err := token.SignedString(mySingingKey)
 	if err != nil {
+		log.Println(err)
 		return "", err
 	}
 
-	token := hex.EncodeToString(buf)
-
-	err = s.Repository.SetToken(token, user.ID)
+	err = s.Repository.SetToken(tokenString, user.ID)
 	if err != nil {
 		log.Println(err)
 		return "", nil
 	}
-	return token, nil
+	return tokenString, nil
 
 }
 

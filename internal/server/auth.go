@@ -54,7 +54,7 @@ func (s *Server) TokenValidator(next http.Handler) http.Handler {
 
 		token := request.Header.Get("token")
 		if len(token) == 0 {
-			log.Println("fuck ")
+			log.Println("Invalid token ")
 			http.Error(writer, http.StatusText(http.StatusBadRequest), 400)
 			return
 		}
