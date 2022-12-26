@@ -367,3 +367,17 @@ func (r *Repository) CloseAccess(file *models.AccessTo) error {
 
 	return nil
 }
+
+func (r *Repository) GetUsers() ([]*models.Users, error) {
+	log := logging.GetLogger()
+
+	var users []*models.Users
+	sqlQwery := `select *from users;`
+	tx := r.Connection.Raw(sqlQwery).Scan(&users)
+	if tx.Error != nil {
+		log.Println("tx error", tx.Error)
+		return nil, tx.Error
+	}
+
+	return users, nil
+}

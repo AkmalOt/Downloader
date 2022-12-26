@@ -267,3 +267,7 @@ func (s *Services) ValidationForAccessDownload(file *models.AccessTo) (*models.A
 func (s *Services) CloseAccess(file *models.AccessTo) error {
 	return s.Repository.CloseAccess(file)
 }
+
+func (s *Services) GetUsers() ([]*models.Users, error) {
+	return s.Repository.GetUsers()
+}

@@ -41,3 +41,9 @@ type HumoDataBase struct {
 	Password string `json:"password"`
 	Dbname   string `json:"dbname"`
 }
+
+type Users struct {
+	ID    string `json:"id" gorm:"id"`
+	Name  string `json:"name" gorm:"name"`
+	Login string `json:"login" gorm:"login"`
+}

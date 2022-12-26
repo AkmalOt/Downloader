@@ -598,7 +598,8 @@ func (s *Server) DeleteFile(w http.ResponseWriter, r *http.Request) {
 
 	_, err = s.Services.GetFileInfoByID(&FileInfo)
 
-	err = os.Remove("./files/" + FileInfo.Name)
+	//log.Println("D:/Server/" + FileInfo.Name)
+	err = os.Remove("D:/Server/" + FileInfo.Name)
 	if err != nil {
 		log.Println(err)
 		return
@@ -760,4 +761,27 @@ func (s *Server) CloseAccess(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(200)
+}
+
+func (s *Server) GetUsers(w http.ResponseWriter, r *http.Request) {
+	log := logging.GetLogger()
+
+	//ctx := r.Context()
+	//value := ctx.Value(userID)
+	//userId := value.(string)
+
+	data, err := s.Services.GetUsers()
+
+	UserData, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	_, err = w.Write(UserData)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	w.WriteHeader(202)
 }
