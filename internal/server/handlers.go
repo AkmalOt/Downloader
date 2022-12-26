@@ -4,7 +4,6 @@ import (
 	"Uploader/internal/models"
 	logging "Uploader/pkg"
 	"encoding/json"
-	"fmt"
 	"github.com/pkg/errors"
 	"io"
 	"net/http"
@@ -63,6 +62,7 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println(token)
 	w.Write([]byte(token))
+
 	w.WriteHeader(200)
 }
 
@@ -87,7 +87,11 @@ func (s *Server) FolderCreator(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.Services.FolderCreation(&FolderInfo)
+	err = s.Services.FolderCreation(&FolderInfo)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 	log.Println("Folder created successful")
 }
@@ -339,6 +343,7 @@ func (s *Server) GetFiles(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	value := ctx.Value(userID)
 	userId := value.(string)
+	//panic("test") For test
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -356,10 +361,10 @@ func (s *Server) GetFiles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if FilesInfo.FolderID == "" {
-		parenFoldertId, _, _ := s.Services.GetParentFolders(&FolderInfo)
-		log.Println(parenFoldertId)
+		parentFolderId, _, _ := s.Services.GetParentFolders(&FolderInfo)
+		log.Println(parentFolderId)
 
-		FilesInfo.FolderID = parenFoldertId
+		FilesInfo.FolderID = parentFolderId
 		log.Println(FilesInfo, "test")
 
 		Files, err := s.Services.GetFiles(&FilesInfo)
@@ -369,23 +374,23 @@ func (s *Server) GetFiles(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			return
 		}
-		fmt.Println("he;p!!!", FilesInfo.ID, FilesInfo.Name, FilesInfo.UserID, FilesInfo.FolderID)
+		//fmt.Println("he;p!!!", FilesInfo.ID, FilesInfo.Name, FilesInfo.UserID, FilesInfo.FolderID)
 		_, err = w.Write(FileData)
 		if err != nil {
 			log.Println(err)
 			return
 		}
 	} else {
-		log.Println(FilesInfo, "test")
+		//log.Println(FilesInfo, "test")
 
 		Files, err := s.Services.GetFiles(&FilesInfo)
-		log.Println(Files)
+		//log.Println(Files)
 		FileData, err := json.MarshalIndent(Files, "", "  ")
 		if err != nil {
 			log.Println(err)
 			return
 		}
-		fmt.Println("he;p!!!", FilesInfo.ID, FilesInfo.Name, FilesInfo.UserID, FilesInfo.FolderID)
+		//fmt.Println("he;p!!!", FilesInfo.ID, FilesInfo.Name, FilesInfo.UserID, FilesInfo.FolderID)
 		_, err = w.Write(FileData)
 		if err != nil {
 			log.Println(err)
@@ -428,7 +433,7 @@ func (s *Server) UploadFile(w http.ResponseWriter, r *http.Request) {
 
 	file, header, err := r.FormFile("files")
 	if err != nil {
-		log.Print("error in fromfile", err)
+		log.Print("error in fromFile", err)
 		return
 	}
 
@@ -489,7 +494,12 @@ func (s *Server) DownloadFile(w http.ResponseWriter, r *http.Request) {
 
 	file, err := os.OpenFile("D:server/"+FileData.Name, os.O_CREATE|os.O_RDWR, 0777)
 
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			log.Println(err)
+		}
+	}(file)
 
 	_, err = io.Copy(w, file)
 	if err != nil {
@@ -580,7 +590,7 @@ func (s *Server) DeleteFile(w http.ResponseWriter, r *http.Request) {
 
 	FileInfo.UserID = userId
 
-	err = json.Unmarshal(body, &FileInfo)
+	err = json.Unmarshal(body, &FileInfo) // todo Json decoder
 	if err != nil {
 		log.Println(err)
 		return
@@ -707,7 +717,12 @@ func (s *Server) DownloadAccessedFiles(w http.ResponseWriter, r *http.Request) {
 
 	file, err := os.OpenFile("files/"+FileData.Name, os.O_CREATE|os.O_RDWR, 0777)
 
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			log.Println(err)
+		}
+	}(file)
 
 	_, err = io.Copy(w, file)
 	if err != nil {

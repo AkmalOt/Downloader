@@ -50,7 +50,7 @@ func (s *Services) Register(userInfo *models.AuthInfo) error {
 
 // ================================================
 
-var mySingingKey = []byte("TestIsRealHard")
+var mySingingKey = config.MySingingKey
 
 func (s *Services) Login(userInfo *models.AuthInfo) (string, error) {
 	log := logging.GetLogger()
@@ -80,6 +80,7 @@ func (s *Services) Login(userInfo *models.AuthInfo) (string, error) {
 
 	//============================================================================
 	//Тут мы создаем Токен.
+
 	// старый метод
 	//buf := make([]byte, 256)
 
@@ -158,7 +159,7 @@ func (s *Services) GetFiles(userFiles *models.File) ([]*models.File, error) {
 		log.Println(err)
 		return nil, err
 	}
-	log.Println(files)
+	//log.Println(files)
 	return files, nil
 }
 

@@ -33,3 +33,11 @@ type AccessTo struct {
 	Active     bool   `json:"active" gorm:"column:active"`
 	Expire     string `json:"expire" gorm:"column:expire"`
 }
+
+type HumoDataBase struct {
+	Host     string `json:"host"`
+	Port     string `json:"port"`
+	User     string `json:"user"`
+	Password string `json:"password"`
+	Dbname   string `json:"dbname"`
+}

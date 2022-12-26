@@ -192,7 +192,7 @@ func (r *Repository) GetFiles(file *models.File) ([]*models.File, error) {
 		log.Println("tx error", tx.Error)
 		return nil, tx.Error
 	}
-	log.Println(files)
+	//log.Println(files)
 	return files, nil
 }
 
@@ -294,8 +294,8 @@ func (r *Repository) GiveAccess(file *models.AccessTo) error {
 				values (?, ?, ?, ?); `
 
 	if file.Expire == "" {
-		time := time.Now().Add(time.Hour * 10)
-		timeString := time.Format("2006-01-02 15:04:05")
+		nowTime := time.Now().Add(time.Hour * 10)
+		timeString := nowTime.Format("2006-01-02 15:04:05")
 
 		file.Expire = timeString
 		tx := r.Connection.Exec(sqlQwery, file.UserID, file.FileId, file.AccessedID, file.Expire)

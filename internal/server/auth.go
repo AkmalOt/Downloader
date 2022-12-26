@@ -4,6 +4,7 @@ import (
 	"Uploader/internal/repository"
 	logging "Uploader/pkg"
 	"context"
+	"log"
 	"net/http"
 )
 
@@ -47,6 +48,14 @@ type contextKey struct {
 
 func (s *Server) TokenValidator(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+
+		defer func() {
+			if err := recover(); err != nil {
+				log.Println("panic occurred:", err)
+			}
+		}()
+		recover()
+
 		log := logging.GetLogger()
 
 		//values := request.URL.Query()
@@ -76,6 +85,12 @@ func (s *Server) TokenValidator(next http.Handler) http.Handler {
 		//log.Println(userIdTest, userId)
 
 		next.ServeHTTP(writer, request)
+
 	})
 
+}
+
+func divide(a, b int) int {
+
+	return a / b
 }

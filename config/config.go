@@ -38,3 +38,16 @@ func Direction() string {
 	Direction := "D:/Server"
 	return Direction
 }
+
+var MySingingKey = []byte("TestIsRealHard")
+
+func ReturnDB() (models.HumoDataBase, error) {
+	var DB models.HumoDataBase
+	DB.Host = "localhost"
+	DB.Port = "5432"
+	DB.User = "humo"
+	DB.Password = "pass"
+	DB.Dbname = "humo_db"
+
+	return DB, nil
+}
